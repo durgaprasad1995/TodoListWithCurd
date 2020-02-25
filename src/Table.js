@@ -1,25 +1,32 @@
 import { Table, Divider, Tag } from 'antd';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import store from "./store"
+
 
 
 import { addAction } from './actions/addAction';
+import { editAction } from './actions/EditAction';
+
 const mapStateToProps = state => ({
-test:state.addReducers.result
+test:state.addReducers.result,
+testingEdit:state.editReducers.result
    })
    const mapDispatchToProps = dispatch => ({
-    addAction: () => dispatch(addAction())
+    addAction: () => dispatch(addAction()),
+    editAction: () => dispatch(editAction())
+
    })
 class TableList extends Component {
 
  
-    componentDidMount(){
-     this.props.addAction()
-    }
+    // componentDidMount(){
+    //  this.props.addAction()
+    //  this.props.editAction()
+    // }
 
     UNSAFE_componentWillReceiveProps(nextProps){
-      console.log("hey", nextProps.test )
+      console.log("hey", nextProps.test );
+      console.log("testingEdit",nextProps.testingEdit)
     }
  addFunction = () =>{
         console.log()
