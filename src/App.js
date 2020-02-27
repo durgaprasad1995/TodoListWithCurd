@@ -1,13 +1,180 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import TableList from "./Table"
-function App() {
-  return (
-    <div className="App">
-      <TableList />
-    </div>
-  );
+import React, { Component } from "react";
+import "antd/dist/antd.css";
+import AddEditModal from "./AddEditModal.js";
+import { Table, Button, Icon, Popconfirm, Row, Col, Tabs } from "antd";
+import notification from "./Notification";
+import "./App.css";
+import data from "./Sample";
+
+const { TabPane } = Tabs;
+// notification.config({
+//   duration: 2
+// });
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: data,
+      showpopUp: false,
+      hasError: false,
+      details: {}
+    };
+    this.columns = [
+      {
+        title: "First Name",
+        dataIndex: "firstName",
+        key: "firstName"
+      },
+      {
+        title: "Last Name",
+        dataIndex: "lastName",
+        key: "lastName"
+      },
+      {
+        title: "Action",
+        render: record =>
+          this.state.data.length >= 1 ? (
+            <span>
+              <Popconfirm
+                title="Are You Sure to Delete"
+                onConfirm={() => this.handleDelete(record)}
+                //onCancel={e => this.cancelDelete(e,record)}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Icon
+                  type="close-circle"
+                  theme="outlined"
+                  className="icon-component margin-right color_custom"
+                />
+              </Popconfirm>
+
+              {/* <a href="javascript:;" onClick={() => this.handleDelete(record)}>Delete</a>&nbsp;&nbsp; */}
+              {/* <a href="javascript:;" onClick={() => this.handleEdit(record)}>Edit</a> */}
+              <Icon
+                type="edit"
+                theme="outlined"
+                className="icon-component color_custom"
+                onClick={() => this.handleEdit(record)}
+              />
+            </span>
+          ) : null
+      }
+    ];
+  }
+
+  componentDidCatch(error, info) {
+    console.log("Error in child", error, info);
+  }
+
+  addRecord = () => {
+    this.setState({
+      details: {},
+      showpopUp: true
+    });
+  };
+  handleDelete(record) {
+    console.log("record", record);
+    const dataSource = [...this.state.data];
+    this.setState({
+      data: dataSource.filter(item => item.id !== record.id)
+    });
+    notification("success", "Record Deleted Successfully");
+  }
+  handleEdit(record) {
+    console.log("Record Info", record);
+    this.setState({
+      details: record,
+      showpopUp: true
+    });
+  }
+  handleCancel = e => {
+    this.setState({
+      showpopUp: false
+    });
+  };
+  callback = key => {
+    console.log(key);
+  };
+  handleFormData = values => {
+    const currentData = [...this.state.data];
+    // For Edit Records
+    if (0 < Object.keys(this.state.details).length) {
+      //debugger;
+      this.state.data.splice(
+        currentData.findIndex(item => item.id === values.id),
+        1,
+        values
+      );
+      this.setState({
+        data: [...this.state.data]
+      });
+      notification("success", "Record Saved Successfully");
+    }
+    //For Add Records
+    else {
+      this.setState({
+        data: [values, ...currentData]
+      });
+      notification("success", "Record Added Successfully");
+    }
+    this.setState(
+      {
+        showpopUp: false
+      },
+      () => {
+        console.log("data.state", this.state.data);
+      }
+    );
+  };
+
+  render() {
+    return (
+      <div>
+        <body>
+          {/* Common Modal Popup for add & edit */}
+          <AddEditModal
+            visible={this.state.showpopUp}
+            details={this.state.details}
+            data={this.state.data}
+            onCancel={this.handleCancel}
+            handleFormData={this.handleFormData}
+          />
+          <h1 className="header_text color_custom">Users Records</h1>
+          <Row type="flex" justify="center">
+            <Col span={22}>
+              <Row>
+                <Col span={24}>
+                  <Tabs defaultActiveKey="2" onChange={this.callback}>
+                    <TabPane tab="Todos" key="1">
+                      Content of Todos
+                    </TabPane>
+                    <TabPane tab="Users" key="2">
+                      <Row>
+                        <Button
+                          type="default"
+                          className="btn-add"
+                          onClick={this.addRecord}
+                        >
+                          Create Users
+                        </Button>
+                      </Row>
+                      <Table
+                        className="tableLayout"
+                        columns={this.columns}
+                        rowKey={record => record.id}
+                        dataSource={this.state.data}
+                      />
+                    </TabPane>
+                  </Tabs>
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+        </body>
+      </div>
+    );
+  }
 }
 
 export default App;
